@@ -1,0 +1,10 @@
+node_modules/
+playwright-report/
+blob-report/
+test-results/
+reports/
+.auth/
+.runtime/
+docs/*.pdf
+docs/*.png
+package-lock.json

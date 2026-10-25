@@ -1,0 +1,43 @@
+name: Setup
+description: Node from .nvmrc with npm cache, npm ci, and (optionally) a cached Chromium.
+
+inputs:
+  browsers:
+    description: Install Playwright's Chromium (cached per Playwright version).
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .nvmrc
+        cache: npm
+
+    - run: npm ci
+      shell: bash
+
+    - name: Read Playwright version
+      if: inputs.browsers == 'true'
+      id: pw
+      shell: bash
+      run: echo "version=$(node -p "require('./node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    - name: Cache browsers
+      if: inputs.browsers == 'true'
+      id: browser-cache
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}-chromium
+
+    # The cache holds the browser binaries only; OS libraries must be installed every run.
+    - name: Install Chromium
+      if: inputs.browsers == 'true' && steps.browser-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: npx playwright install --with-deps chromium
+
+    - name: Install Chromium system dependencies
+      if: inputs.browsers == 'true' && steps.browser-cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: npx playwright install-deps chromium

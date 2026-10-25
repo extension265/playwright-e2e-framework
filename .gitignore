@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Secrets — only .env.example is committed
+.env
+.env.*
+!.env.example
+
+# Auth state written by the setup project
+.auth/
+auth/
+
+# Playwright output
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Framework runtime output
+.runtime/
+reports/
+
+# Editor / OS / tooling
+.vscode/
+.idea/
+.claude/
+.playwright-mcp/
+.DS_Store
+Thumbs.db
+*.log

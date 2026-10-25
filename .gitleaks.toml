@@ -1,0 +1,30 @@
+# gitleaks configuration — used locally and in CI (`gitleaks git --config .gitleaks.toml`).
+# The default ruleset only flags high-entropy tokens, so it misses human-chosen
+# passwords like "Summer2024!". The extra rule below catches password literals
+# assigned in env files, JS and docs. Intentional, public values are marked inline
+# with `gitleaks:allow` so every exception is visible in code review.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "plaintext-password-assignment"
+description = "Password literal assigned in env/js/md"
+regex = '''(?i)(?:password|passwd|pwd)["']?\s*[:=]\s*(?:process\.env\.\w+\s*\|\|\s*)?["'`]?([^\s"'`<>,]{4,})'''
+secretGroup = 1
+
+[rules.allowlist]
+# Values that are code, not secrets: env lookups, function calls, template
+# expressions, property references (a.b), placeholders and literals like null.
+regexes = [
+  '''^process\.env''',
+  '''^[A-Za-z_.]+\(''',
+  '''^\$\{''',
+  '''^[A-Za-z_]\w*\.[A-Za-z_][\w.]*$''',
+  '''^<''',
+  '''^\*+$''',
+  '''^(string|null|undefined|true|false)$''',
+]
+
+[allowlist]
+paths = ['''node_modules''', '''package-lock\.json''']
